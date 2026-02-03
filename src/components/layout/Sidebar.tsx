@@ -1,41 +1,51 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Package, Tags, ShoppingCart, Users, Settings, Menu, X } from 'lucide-react'
-import { useMoneda } from '@/context/MonedaContext'
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import Image from "next/image";
+import {
+  LayoutDashboard,
+  Package,
+  Tags,
+  ShoppingCart,
+  Users,
+  Settings,
+  Menu,
+  X,
+} from "lucide-react";
+import { useMoneda } from "@/context/MonedaContext";
 
 const navItems = [
-  { href: '/', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/productos', label: 'Productos', icon: Package },
-  { href: '/categorias', label: 'Categorías', icon: Tags },
-  { href: '/ventas', label: 'Ventas', icon: ShoppingCart },
-  { href: '/clientes', label: 'Clientes', icon: Users },
-  { href: '/configuracion', label: 'Configuración', icon: Settings },
-]
+  { href: "/", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/productos", label: "Productos", icon: Package },
+  { href: "/categorias", label: "Categorías", icon: Tags },
+  { href: "/ventas", label: "Ventas", icon: ShoppingCart },
+  { href: "/clientes", label: "Clientes", icon: Users },
+  { href: "/configuracion", label: "Configuración", icon: Settings },
+];
 
 export function Sidebar() {
-  const pathname = usePathname()
-  const { monedaActual, getTasa } = useMoneda()
-  const tasaActual = getTasa(monedaActual)
-  const [isOpen, setIsOpen] = useState(false)
+  const pathname = usePathname();
+  const { monedaActual, getTasa } = useMoneda();
+  const tasaActual = getTasa(monedaActual);
+  const [isOpen, setIsOpen] = useState(false);
 
   // Cerrar sidebar al cambiar de ruta
   useEffect(() => {
-    setIsOpen(false)
-  }, [pathname])
+    setIsOpen(false);
+  }, [pathname]);
 
   // Cerrar sidebar al hacer resize a desktop
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 1024) {
-        setIsOpen(false)
+        setIsOpen(false);
       }
-    }
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [])
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   return (
     <>
@@ -60,14 +70,14 @@ export function Sidebar() {
         className={`
           fixed left-0 top-0 h-full w-64 bg-slate-800 border-r border-slate-700 flex flex-col z-50
           transform transition-transform duration-300 ease-in-out
-          ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+          ${isOpen ? "translate-x-0" : "-translate-x-full"}
           lg:translate-x-0
         `}
       >
         <div className="p-6 flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-white">
-            RedAbasto<span className="text-blue-500">House</span>
-          </h1>
+          <div>
+            <Image src="/text-logo-white.svg" width={200} height={200} alt="logo" />
+          </div>
           {/* Botón cerrar para móvil */}
           <button
             onClick={() => setIsOpen(false)}
@@ -79,8 +89,8 @@ export function Sidebar() {
 
         <nav className="px-4 space-y-1 flex-1">
           {navItems.map((item) => {
-            const isActive = pathname === item.href
-            const Icon = item.icon
+            const isActive = pathname === item.href;
+            const Icon = item.icon;
 
             return (
               <Link
@@ -88,14 +98,14 @@ export function Sidebar() {
                 href={item.href}
                 className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
                   isActive
-                    ? 'bg-blue-600 text-white'
-                    : 'text-slate-300 hover:bg-slate-700 hover:text-white'
+                    ? "bg-blue-600 text-white"
+                    : "text-slate-300 hover:bg-slate-700 hover:text-white"
                 }`}
               >
                 <Icon className="w-5 h-5" />
                 <span className="font-medium">{item.label}</span>
               </Link>
-            )
+            );
           })}
         </nav>
 
@@ -107,7 +117,7 @@ export function Sidebar() {
               <p className="text-lg font-bold text-green-400">
                 {tasaActual?.simbolo} {monedaActual}
               </p>
-              {monedaActual !== 'USD' && tasaActual && (
+              {monedaActual !== "USD" && tasaActual && (
                 <p className="text-xs text-slate-500">
                   1 USD = {tasaActual.tasa.toLocaleString()} {monedaActual}
                 </p>
@@ -117,5 +127,5 @@ export function Sidebar() {
         </div>
       </aside>
     </>
-  )
+  );
 }

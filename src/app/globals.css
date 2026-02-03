@@ -40,10 +40,13 @@
   --color-emerald-600: #059669;
 }
 
-html, body {
+html,
+body {
   min-height: 100vh;
   background-color: #0f172a;
   color: #f8fafc;
+  padding-top: calc(env(safe-area-inset-top) + 1rem);
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 ::-webkit-scrollbar {
