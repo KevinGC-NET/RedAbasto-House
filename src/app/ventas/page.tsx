@@ -940,10 +940,10 @@ export default function VentasPage() {
                 </tbody>
                 <tfoot>
                   <tr className="border-t border-slate-600 bg-slate-700/30">
-                    <td colSpan={2} className="px-4 py-3 text-right font-medium text-slate-300">
+                    <td colSpan={1} className="px-4 py-3 text-right font-medium text-slate-300">
                       Total:
                     </td>
-                    <td className="px-4 py-3 text-right font-bold text-green-400">
+                    <td colSpan={2} className="px-4 py-3 text-right font-bold text-green-400">
                       {formatearPrecio(getTotal())}
                     </td>
                     <td></td>
@@ -962,7 +962,7 @@ export default function VentasPage() {
           <div className="bg-slate-700/30 p-3 rounded-lg text-sm text-slate-400">
             <p>Las tasas de cambio actuales se guardarán con esta venta:</p>
             <div className="flex gap-4 mt-1">
-              <span>COP: {getTasa('COP')?.tasa?.toLocaleString() || 'N/A'}</span>
+              <span>USD: {getTasa('USD')?.tasa?.toLocaleString() || 'N/A'}</span>
               <span>VES: {getTasa('VES')?.tasa?.toLocaleString() || 'N/A'}</span>
             </div>
           </div>

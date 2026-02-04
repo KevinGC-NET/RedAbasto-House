@@ -45,8 +45,15 @@ body {
   min-height: 100vh;
   background-color: #0f172a;
   color: #f8fafc;
-  padding-top: calc(env(safe-area-inset-top) + 1rem);
-  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Sólo para mobile */
+@media (max-width: 768px) {
+  html,
+  body {
+    margin-top: calc(env(safe-area-inset-top) + .8rem);
+    margin-bottom: env(safe-area-inset-bottom);
+  }
 }
 
 ::-webkit-scrollbar {

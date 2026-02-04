@@ -1,81 +1,88 @@
-'use client'
+"use client";
 
-import { useState, useRef, useEffect } from 'react'
-import { Search, Package, X } from 'lucide-react'
-import type { Producto } from '@/types'
+import { useState, useRef, useEffect } from "react";
+import { Search, Package, X } from "lucide-react";
+import type { Producto } from "@/types";
 
 interface ProductSearchProps {
-  productos: Producto[]
-  onSelect: (producto: Producto) => void
-  formatearPrecio: (precio: number) => string
+  productos: Producto[];
+  onSelect: (producto: Producto) => void;
+  formatearPrecio: (precio: number) => string;
 }
 
-export function ProductSearch({ productos, onSelect, formatearPrecio }: ProductSearchProps) {
-  const [query, setQuery] = useState('')
-  const [isOpen, setIsOpen] = useState(false)
-  const [highlightedIndex, setHighlightedIndex] = useState(0)
-  const inputRef = useRef<HTMLInputElement>(null)
-  const listRef = useRef<HTMLDivElement>(null)
+export function ProductSearch({
+  productos,
+  onSelect,
+  formatearPrecio,
+}: ProductSearchProps) {
+  const [query, setQuery] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+  const [highlightedIndex, setHighlightedIndex] = useState(0);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
 
   const filteredProducts = query.trim()
-    ? productos.filter(p =>
-        p.nombre.toLowerCase().includes(query.toLowerCase()) ||
-        p.descripcion?.toLowerCase().includes(query.toLowerCase())
-      ).slice(0, 8)
-    : productos.slice(0, 8)
+    ? productos
+        .filter(
+          (p) =>
+            p.nombre.toLowerCase().includes(query.toLowerCase()) ||
+            p.descripcion?.toLowerCase().includes(query.toLowerCase()),
+        )
+        .slice(0, 8)
+    : productos.slice(0, 8);
 
   useEffect(() => {
-    setHighlightedIndex(0)
-  }, [query])
+    setHighlightedIndex(0);
+  }, [query]);
 
   useEffect(() => {
     if (highlightedIndex >= 0 && listRef.current) {
-      const item = listRef.current.children[highlightedIndex] as HTMLElement
+      const item = listRef.current.children[highlightedIndex] as HTMLElement;
       if (item) {
-        item.scrollIntoView({ block: 'nearest' })
+        item.scrollIntoView({ block: "nearest" });
       }
     }
-  }, [highlightedIndex])
+  }, [highlightedIndex]);
 
   function handleKeyDown(e: React.KeyboardEvent) {
     if (!isOpen) {
-      if (e.key === 'ArrowDown' || e.key === 'Enter') {
-        setIsOpen(true)
+      if (e.key === "ArrowDown" || e.key === "Enter") {
+        setIsOpen(true);
       }
-      return
+      return;
     }
 
     switch (e.key) {
-      case 'ArrowDown':
-        e.preventDefault()
-        setHighlightedIndex(prev =>
-          prev < filteredProducts.length - 1 ? prev + 1 : prev
-        )
-        break
-      case 'ArrowUp':
-        e.preventDefault()
-        setHighlightedIndex(prev => prev > 0 ? prev - 1 : 0)
-        break
-      case 'Enter':
-        e.preventDefault()
+      case "ArrowDown":
+        e.preventDefault();
+        setHighlightedIndex((prev) =>
+          prev < filteredProducts.length - 1 ? prev + 1 : prev,
+        );
+        break;
+      case "ArrowUp":
+        e.preventDefault();
+        setHighlightedIndex((prev) => (prev > 0 ? prev - 1 : 0));
+        break;
+      case "Enter":
+        e.preventDefault();
         if (filteredProducts[highlightedIndex]) {
-          handleSelect(filteredProducts[highlightedIndex])
+          handleSelect(filteredProducts[highlightedIndex]);
         }
-        break
-      case 'Escape':
-        setIsOpen(false)
-        break
+        break;
+      case "Escape":
+        setIsOpen(false);
+        break;
     }
   }
 
   function handleSelect(producto: Producto) {
     if (producto.stock <= 0) {
-      return
+      return;
     }
-    onSelect(producto)
-    setQuery('')
-    setIsOpen(false)
-    inputRef.current?.focus()
+    onSelect(producto);
+    setQuery("");
+    inputRef.current?.focus();
+    setIsOpen(false);
   }
 
   return (
@@ -87,8 +94,8 @@ export function ProductSearch({ productos, onSelect, formatearPrecio }: ProductS
           type="text"
           value={query}
           onChange={(e) => {
-            setQuery(e.target.value)
-            setIsOpen(true)
+            setQuery(e.target.value);
+            setIsOpen(true);
           }}
           onFocus={() => setIsOpen(true)}
           onKeyDown={handleKeyDown}
@@ -99,8 +106,8 @@ export function ProductSearch({ productos, onSelect, formatearPrecio }: ProductS
           <button
             type="button"
             onClick={() => {
-              setQuery('')
-              inputRef.current?.focus()
+              setQuery("");
+              inputRef.current?.focus();
             }}
             className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-slate-600 rounded"
           >
@@ -132,10 +139,12 @@ export function ProductSearch({ productos, onSelect, formatearPrecio }: ProductS
                   disabled={producto.stock <= 0}
                   className={`w-full flex items-center gap-3 p-3 text-left transition-colors ${
                     index === highlightedIndex
-                      ? 'bg-blue-600/30'
-                      : 'hover:bg-slate-700/50'
-                  } ${producto.stock <= 0 ? 'opacity-50 cursor-not-allowed' : ''} ${
-                    index !== filteredProducts.length - 1 ? 'border-b border-slate-700/50' : ''
+                      ? "bg-blue-600/30"
+                      : "hover:bg-slate-700/50"
+                  } ${producto.stock <= 0 ? "opacity-50 cursor-not-allowed" : ""} ${
+                    index !== filteredProducts.length - 1
+                      ? "border-b border-slate-700/50"
+                      : ""
                   }`}
                 >
                   {producto.imagen_url ? (
@@ -150,22 +159,30 @@ export function ProductSearch({ productos, onSelect, formatearPrecio }: ProductS
                     </div>
                   )}
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-slate-100 truncate">{producto.nombre}</p>
+                    <p className="font-medium text-slate-100 truncate">
+                      {producto.nombre}
+                    </p>
                     {producto.descripcion && (
-                      <p className="text-sm text-slate-400 truncate">{producto.descripcion}</p>
+                      <p className="text-sm text-slate-400 truncate">
+                        {producto.descripcion}
+                      </p>
                     )}
                     <div className="flex items-center gap-3 mt-1">
                       <span className="text-sm font-semibold text-green-400">
                         {formatearPrecio(producto.precio)}
                       </span>
-                      <span className={`text-xs px-1.5 py-0.5 rounded ${
-                        producto.stock > 10
-                          ? 'bg-green-900/50 text-green-400'
-                          : producto.stock > 0
-                          ? 'bg-yellow-900/50 text-yellow-400'
-                          : 'bg-red-900/50 text-red-400'
-                      }`}>
-                        {producto.stock > 0 ? `Stock: ${producto.stock}` : 'Sin stock'}
+                      <span
+                        className={`text-xs px-1.5 py-0.5 rounded ${
+                          producto.stock > 10
+                            ? "bg-green-900/50 text-green-400"
+                            : producto.stock > 0
+                              ? "bg-yellow-900/50 text-yellow-400"
+                              : "bg-red-900/50 text-red-400"
+                        }`}
+                      >
+                        {producto.stock > 0
+                          ? `Stock: ${producto.stock}`
+                          : "Sin stock"}
                       </span>
                     </div>
                   </div>
@@ -181,5 +198,5 @@ export function ProductSearch({ productos, onSelect, formatearPrecio }: ProductS
         </>
       )}
     </div>
-  )
+  );
 }

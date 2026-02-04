@@ -99,7 +99,7 @@ export function MonedaProvider({ children }: { children: ReactNode }) {
     }
 
     const numero = new Intl.NumberFormat('es-CO', opciones).format(precio)
-    return `${tasa.simbolo} ${numero} ${mon}`
+    return `${tasa.simbolo} ${numero}`
   }
 
   return (

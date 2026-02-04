@@ -52,7 +52,7 @@ export function Sidebar() {
       {/* Botón hamburguesa para móvil */}
       <button
         onClick={() => setIsOpen(true)}
-        className="lg:hidden fixed top-4 left-4 z-40 p-2 bg-slate-800 rounded-lg border border-slate-700"
+        className="lg:hidden fixed top-9 left-4 z-40 p-2 bg-slate-800 rounded-lg border border-slate-700"
       >
         <Menu className="w-6 h-6 text-slate-100" />
       </button>
