@@ -1,7 +1,15 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
-import { Plus, Pencil, Trash2, Package, LayoutGrid, List } from "lucide-react";
+import { useState, useEffect, useMemo, Suspense } from "react";
+import {
+  Plus,
+  Pencil,
+  Trash2,
+  Package,
+  LayoutGrid,
+  List,
+  Loader2,
+} from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import {
   Button,
@@ -21,7 +29,7 @@ import { WhatsappButton } from "@/components/ui/whatsapp-button";
 
 type ViewMode = "grid" | "table";
 
-export default function ProductosPage() {
+export function ProductosPageContent() {
   const isAdmin = useIsAdmin();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -819,5 +827,19 @@ export default function ProductosPage() {
         </Modal>
       )}
     </div>
+  );
+}
+
+export default function ProductosPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex flex-col min-h-screen items-center justify-center">
+          <Loader2 size={50} className="animate-spin text-slate-400" />
+        </div>
+      }
+    >
+      <ProductosPageContent />
+    </Suspense>
   );
 }
