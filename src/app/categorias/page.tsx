@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Plus, Pencil, Trash2 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
-import { Button, Input, Modal, Card, CardHeader, CardContent } from '@/components/ui'
+import { Button, Input, Modal, Card, CardContent } from '@/components/ui'
 import type { Categoria } from '@/types'
 
 export default function CategoriasPage() {

@@ -15,8 +15,9 @@ import {
   X,
 } from "lucide-react";
 import { useMoneda } from "@/context/MonedaContext";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 
-const navItems = [
+const navItemAdmin = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
   { href: "/productos", label: "Productos", icon: Package },
   { href: "/categorias", label: "Categorías", icon: Tags },
@@ -25,7 +26,14 @@ const navItems = [
   { href: "/configuracion", label: "Configuración", icon: Settings },
 ];
 
+const navItemPublic = [
+  { href: "/productos", label: "Productos", icon: Package },
+];
+
 export function Sidebar() {
+  const isAdmin = useIsAdmin();
+  const navItems = isAdmin ? navItemAdmin : navItemPublic;
+
   const pathname = usePathname();
   const { monedaActual, getTasa } = useMoneda();
   const tasaActual = getTasa(monedaActual);
@@ -76,7 +84,12 @@ export function Sidebar() {
       >
         <div className="p-6 flex items-center justify-between">
           <div>
-            <Image src="/text-logo-white.svg" width={200} height={200} alt="logo" />
+            <Image
+              src="/text-logo-white.svg"
+              width={200}
+              height={200}
+              alt="logo"
+            />
           </div>
           {/* Botón cerrar para móvil */}
           <button
@@ -111,7 +124,7 @@ export function Sidebar() {
 
         {/* Indicador de moneda actual */}
         <div className="p-4 border-t border-slate-700">
-          <Link href="/configuracion" className="block">
+          <Link href={`${isAdmin ? "/configuracion" : "#"}`} className="block">
             <div className="px-4 py-3 bg-slate-700/50 rounded-lg hover:bg-slate-700 transition-colors">
               <p className="text-xs text-slate-400 mb-1">Moneda actual</p>
               <p className="text-lg font-bold text-green-400">

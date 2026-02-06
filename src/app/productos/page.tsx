@@ -15,15 +15,20 @@ import {
 import { useMoneda } from "@/context/MonedaContext";
 import type { Producto, Categoria } from "@/types";
 import Image from "next/image";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
+import { WhatsappButton } from "@/components/ui/whatsapp-button";
 
 type ViewMode = "grid" | "table";
 
 export default function ProductosPage() {
+  const isAdmin = useIsAdmin();
+
   const [productos, setProductos] = useState<Producto[]>([]);
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [filtroEstado, setFiltroEstado] = useState<string>("all");
+  const [filterCategory, setFilterCategory] = useState<string>("all");
   const [editingProducto, setEditingProducto] = useState<Producto | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [formData, setFormData] = useState({
@@ -38,21 +43,45 @@ export default function ProductosPage() {
   const { formatearPrecio } = useMoneda();
 
   const filteredProducts = useMemo(() => {
-    if (filtroEstado === "all") return productos;
-    
-    return [...productos].sort((a, b) => {
-      const aMatches = filtroEstado === "pendiente" ? a.stock > 0 : a.stock <= 0;
-      const bMatches = filtroEstado === "pendiente" ? b.stock > 0 : b.stock <= 0;
-      
-      if (aMatches && !bMatches) return -1;
-      if (!aMatches && bMatches) return 1;
-      return 0;
-    });
-  }, [filtroEstado, productos]);
+    let filter = productos;
+    if (filtroEstado === "all") {
+      filter = productos;
+    }
+
+    if (filtroEstado !== "all") {
+      filter = [...productos].sort((a, b) => {
+        const aMatches =
+          filtroEstado === "pendiente" ? a.stock > 0 : a.stock <= 0;
+        const bMatches =
+          filtroEstado === "pendiente" ? b.stock > 0 : b.stock <= 0;
+
+        if (aMatches && !bMatches) return -1;
+        if (!aMatches && bMatches) return 1;
+        return 0;
+      });
+    }
+
+    if (filterCategory !== "all") {
+      filter = filter.filter((producto) => {
+        if (!producto.categoria) return false;
+        return producto.categoria.id === filterCategory;
+      });
+    }
+
+    if (filterCategory === "all") {
+      filter = filter.filter((producto) => {
+        if (!producto.categoria) return true;
+        return producto.categoria.id !== filterCategory;
+      });
+    }
+
+    return filter;
+  }, [filtroEstado, productos, filterCategory]);
 
   useEffect(() => {
-    fetchData();
     // Recuperar preferencia de vista
+    fetchData();
+
     const savedView = localStorage.getItem("productos-view") as ViewMode;
     if (savedView) setViewMode(savedView);
   }, []);
@@ -67,6 +96,7 @@ export default function ProductosPage() {
       supabase
         .from("productos")
         .select("*, categoria:categorias(*)")
+        .order("stock", { ascending: false })
         .order("created_at", { ascending: false }),
       supabase.from("categorias").select("*").order("nombre"),
     ]);
@@ -182,47 +212,66 @@ export default function ProductosPage() {
         <p className="text-slate-400 text-sm sm:text-base">
           Gestiona tu inventario de productos (precios en USD)
         </p>
-        <div className="flex items-center gap-2 w-full sm:w-auto">
-          {/* Toggle de vista */}
-          <div className="flex items-center bg-slate-800 rounded-lg p-1 border border-slate-700">
-            <button
-              onClick={() => changeViewMode("grid")}
-              className={`p-2 rounded-md transition-colors ${
-                viewMode === "grid"
-                  ? "bg-blue-600 text-white"
-                  : "text-slate-400 hover:text-slate-200"
-              }`}
-              title="Vista de cuadrícula"
-            >
-              <LayoutGrid className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => changeViewMode("table")}
-              className={`p-2 rounded-md transition-colors ${
-                viewMode === "table"
-                  ? "bg-blue-600 text-white"
-                  : "text-slate-400 hover:text-slate-200"
-              }`}
-              title="Vista de tabla"
-            >
-              <List className="w-4 h-4" />
-            </button>
+        <div className="grid grid-cols-2 items-center gap-2 w-full sm:w-auto">
+          <div className="w-full">
+            <Select
+              label="Filtrar por categoría"
+              value={filterCategory}
+              onChange={(e) => setFilterCategory(e.target.value)}
+              options={[
+                { value: "all", label: "Todas las categorías" },
+                ...categorias.map((c) => ({
+                  value: c.id,
+                  label: c.nombre,
+                })),
+              ]}
+            />
           </div>
-          <div className="w-full lg:w-48">
-            <select
+          <div className="w-full">
+            <Select
+              label="Filtrar por disponibilidad"
               value={filtroEstado}
               onChange={(e) => setFiltroEstado(e.target.value)}
-              className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="all">Todos los estados</option>
-              <option value="pendiente">Disponibles</option>
-              <option value="parcial">Vendidos</option>
-            </select>
+              options={[
+                { value: "all", label: "Todos los estados" },
+                { value: "pendiente", label: "Disponibles" },
+                { value: "parcial", label: "Vendidos" },
+              ]}
+            />
           </div>
-          <Button onClick={() => openModal()} className="flex-1 sm:flex-none">
-            <Plus className="w-4 h-4 mr-2" />
-            Nuevo Producto
-          </Button>
+          {/* Toggle de vista */}
+          {isAdmin && (
+            <div className="flex items-center w-20 bg-slate-800 rounded-lg p-1 border border-slate-700">
+              <button
+                onClick={() => changeViewMode("grid")}
+                className={`p-2 rounded-md transition-colors ${
+                  viewMode === "grid"
+                    ? "bg-blue-600 text-white"
+                    : "text-slate-400 hover:text-slate-200"
+                }`}
+                title="Vista de cuadrícula"
+              >
+                <LayoutGrid className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => changeViewMode("table")}
+                className={`p-2 rounded-md transition-colors ${
+                  viewMode === "table"
+                    ? "bg-blue-600 text-white"
+                    : "text-slate-400 hover:text-slate-200"
+                }`}
+                title="Vista de tabla"
+              >
+                <List className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+          {isAdmin && (
+            <Button onClick={() => openModal()} className="flex-1 sm:flex-none">
+              <Plus className="w-4 h-4 mr-2" />
+              Nuevo Producto
+            </Button>
+          )}
         </div>
       </div>
 
@@ -312,13 +361,11 @@ export default function ProductosPage() {
                       {producto.nombre}
                     </h3>
                     {producto.descripcion && (
-                      <p className="text-sm text-slate-400 line-clamp-2 mb-3 min-h-[2.5rem]">
+                      <p className="text-sm text-slate-400 line-clamp-2 mb-3 min-h-10">
                         {producto.descripcion}
                       </p>
                     )}
-                    {!producto.descripcion && (
-                      <div className="mb-3 min-h-[2.5rem]" />
-                    )}
+                    {!producto.descripcion && <div className="mb-3 min-h-10" />}
 
                     {/* Precio */}
                     <div className="mb-4">
@@ -332,19 +379,29 @@ export default function ProductosPage() {
 
                     {/* Acciones */}
                     <div className="flex gap-2">
-                      <button
-                        onClick={() => openModal(producto)}
-                        className="flex-1 flex items-center justify-center gap-2 py-2 px-3 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm text-slate-200 transition-colors"
-                      >
-                        <Pencil className="w-4 h-4" />
-                        Editar
-                      </button>
-                      <button
-                        onClick={() => handleDelete(producto.id)}
-                        className="p-2 bg-slate-700 hover:bg-red-900/50 rounded-lg transition-colors group/btn"
-                      >
-                        <Trash2 className="w-4 h-4 text-slate-400 group-hover/btn:text-red-400" />
-                      </button>
+                      {isAdmin ? (
+                        <>
+                          <button
+                            onClick={() => openModal(producto)}
+                            className="flex-1 flex items-center justify-center gap-2 py-2 px-3 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm text-slate-200 transition-colors"
+                          >
+                            <Pencil className="w-4 h-4" />
+                            Editar
+                          </button>
+                          <button
+                            onClick={() => handleDelete(producto.id)}
+                            className="p-2 bg-slate-700 hover:bg-red-900/50 rounded-lg transition-colors group/btn"
+                          >
+                            <Trash2 className="w-4 h-4 text-slate-400 group-hover/btn:text-red-400" />
+                          </button>
+                        </>
+                      ) : (
+                        <WhatsappButton
+                          productName={producto.nombre}
+                          productId={producto.id}
+                          price={`$ ${producto.precio} al cambio BCV`}
+                        />
+                      )}
                     </div>
                   </div>
                 </div>
@@ -435,8 +492,8 @@ export default function ProductosPage() {
                             producto.stock > 10
                               ? "bg-green-900/50 text-green-400"
                               : producto.stock > 0
-                                ? "bg-yellow-900/50 text-yellow-400"
-                                : "bg-red-900/50 text-red-400"
+                              ? "bg-yellow-900/50 text-yellow-400"
+                              : "bg-red-900/50 text-red-400"
                           }`}
                         >
                           {producto.stock}
@@ -478,10 +535,10 @@ export default function ProductosPage() {
                           alt={producto.nombre}
                           width={400}
                           height={400}
-                          className="w-16 h-16 rounded-lg object-cover flex-shrink-0"
+                          className="w-16 h-16 rounded-lg object-cover shrink-0"
                         />
                       ) : (
-                        <div className="w-16 h-16 rounded-lg bg-slate-700 flex items-center justify-center flex-shrink-0">
+                        <div className="w-16 h-16 rounded-lg bg-slate-700 flex items-center justify-center shrink-0">
                           <Package className="w-8 h-8 text-slate-500" />
                         </div>
                       )}
@@ -497,7 +554,7 @@ export default function ProductosPage() {
                               </span>
                             )}
                           </div>
-                          <div className="flex gap-1 flex-shrink-0 ml-2">
+                          <div className="flex gap-1 shrink-0 ml-2">
                             <button
                               onClick={() => openModal(producto)}
                               className="p-2 hover:bg-slate-700 rounded-lg transition-colors"
@@ -526,8 +583,8 @@ export default function ProductosPage() {
                               producto.stock > 10
                                 ? "bg-green-900/50 text-green-400"
                                 : producto.stock > 0
-                                  ? "bg-yellow-900/50 text-yellow-400"
-                                  : "bg-red-900/50 text-red-400"
+                                ? "bg-yellow-900/50 text-yellow-400"
+                                : "bg-red-900/50 text-red-400"
                             }`}
                           >
                             Stock: {producto.stock}
@@ -611,12 +668,12 @@ export default function ProductosPage() {
                         {producto.nombre}
                       </h3>
                       {producto.descripcion && (
-                        <p className="text-sm text-slate-400 line-clamp-2 mb-3 min-h-[2.5rem]">
+                        <p className="text-sm text-slate-400 line-clamp-2 mb-3 min-h-10">
                           {producto.descripcion}
                         </p>
                       )}
                       {!producto.descripcion && (
-                        <div className="mb-3 min-h-[2.5rem]" />
+                        <div className="mb-3 min-h-10" />
                       )}
 
                       {/* Precio */}
@@ -631,19 +688,29 @@ export default function ProductosPage() {
 
                       {/* Acciones */}
                       <div className="flex gap-2">
-                        <button
-                          onClick={() => openModal(producto)}
-                          className="flex-1 flex items-center justify-center gap-2 py-2 px-3 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm text-slate-200 transition-colors"
-                        >
-                          <Pencil className="w-4 h-4" />
-                          Editar
-                        </button>
-                        <button
-                          onClick={() => handleDelete(producto.id)}
-                          className="p-2 bg-slate-700 hover:bg-red-900/50 rounded-lg transition-colors group/btn"
-                        >
-                          <Trash2 className="w-4 h-4 text-slate-400 group-hover/btn:text-red-400" />
-                        </button>
+                        {isAdmin ? (
+                          <>
+                            <button
+                              onClick={() => openModal(producto)}
+                              className="flex-1 flex items-center justify-center gap-2 py-2 px-3 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm text-slate-200 transition-colors"
+                            >
+                              <Pencil className="w-4 h-4" />
+                              Editar
+                            </button>
+                            <button
+                              onClick={() => handleDelete(producto.id)}
+                              className="p-2 bg-slate-700 hover:bg-red-900/50 rounded-lg transition-colors group/btn"
+                            >
+                              <Trash2 className="w-4 h-4 text-slate-400 group-hover/btn:text-red-400" />
+                            </button>
+                          </>
+                        ) : (
+                          <WhatsappButton
+                            productName={producto.nombre}
+                            productId={producto.id}
+                            price={`$ ${producto.precio} al cambio BCV`}
+                          />
+                        )}
                       </div>
                     </div>
                   </div>
@@ -654,72 +721,77 @@ export default function ProductosPage() {
         </>
       )}
 
-      <Modal
-        isOpen={modalOpen}
-        onClose={closeModal}
-        title={editingProducto ? "Editar Producto" : "Nuevo Producto"}
-      >
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <Input
-            label="Nombre"
-            value={formData.nombre}
-            onChange={(e) =>
-              setFormData({ ...formData, nombre: e.target.value })
-            }
-            required
-          />
-          <Input
-            label="Descripción (opcional)"
-            value={formData.descripcion}
-            onChange={(e) =>
-              setFormData({ ...formData, descripcion: e.target.value })
-            }
-          />
-          <div className="grid grid-cols-2 gap-4">
+      {isAdmin && (
+        <Modal
+          isOpen={modalOpen}
+          onClose={closeModal}
+          title={editingProducto ? "Editar Producto" : "Nuevo Producto"}
+        >
+          <form onSubmit={handleSubmit} className="space-y-4">
             <Input
-              label="Precio (USD)"
-              type="number"
-              step="0.01"
-              min="0"
-              value={formData.precio}
+              label="Nombre"
+              value={formData.nombre}
               onChange={(e) =>
-                setFormData({ ...formData, precio: e.target.value })
+                setFormData({ ...formData, nombre: e.target.value })
               }
               required
             />
             <Input
-              label="Stock"
-              type="number"
-              min="0"
-              value={formData.stock}
+              label="Descripción (opcional)"
+              value={formData.descripcion}
               onChange={(e) =>
-                setFormData({ ...formData, stock: e.target.value })
+                setFormData({ ...formData, descripcion: e.target.value })
               }
-              required
             />
-          </div>
-          <Select
-            label="Categoría"
-            value={formData.categoria_id}
-            onChange={(e) =>
-              setFormData({ ...formData, categoria_id: e.target.value })
-            }
-            options={categorias.map((c) => ({ value: c.id, label: c.nombre }))}
-          />
-          <ImageUpload
-            value={formData.imagen_url}
-            onChange={(url) => setFormData({ ...formData, imagen_url: url })}
-          />
-          <div className="flex gap-3 pt-4">
-            <Button type="button" variant="secondary" onClick={closeModal}>
-              Cancelar
-            </Button>
-            <Button type="submit" variant="success">
-              {editingProducto ? "Guardar Cambios" : "Crear Producto"}
-            </Button>
-          </div>
-        </form>
-      </Modal>
+            <div className="grid grid-cols-2 gap-4">
+              <Input
+                label="Precio (USD)"
+                type="number"
+                step="0.01"
+                min="0"
+                value={formData.precio}
+                onChange={(e) =>
+                  setFormData({ ...formData, precio: e.target.value })
+                }
+                required
+              />
+              <Input
+                label="Stock"
+                type="number"
+                min="0"
+                value={formData.stock}
+                onChange={(e) =>
+                  setFormData({ ...formData, stock: e.target.value })
+                }
+                required
+              />
+            </div>
+            <Select
+              label="Categoría"
+              value={formData.categoria_id}
+              onChange={(e) =>
+                setFormData({ ...formData, categoria_id: e.target.value })
+              }
+              options={categorias.map((c) => ({
+                value: c.id,
+                label: c.nombre,
+              }))}
+            />
+            <ImageUpload
+              value={formData.imagen_url}
+              onChange={(url) => setFormData({ ...formData, imagen_url: url })}
+            />
+            <div className="flex gap-3 pt-4">
+              <Button type="button" variant="secondary" onClick={closeModal}>
+                Cancelar
+              </Button>
+              <Button type="submit" variant="success">
+                {editingProducto ? "Guardar Cambios" : "Crear Producto"}
+              </Button>
+            </div>
+          </form>
+        </Modal>
+      )}
     </div>
   );
 }

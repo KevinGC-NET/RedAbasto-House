@@ -22,6 +22,24 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            // Nombre base de tu aplicación
+            def projectName = "RedAbasto-tienda"
+
+            // Tipo de compilación (debug o release)
+            def type = variant.buildType.name
+
+            // Versión definida en tu defaultConfig
+            def versionName = variant.versionName
+
+            // Formato final: RedAbasto-v1.0-debug.apk
+            def newName = "${projectName}-v${versionName}-${type}.apk"
+
+            outputFileName = newName
+        }
+    }
 }
 
 repositories {

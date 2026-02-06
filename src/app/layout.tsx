@@ -1,23 +1,23 @@
-import type { Metadata } from "next"
-import { Inter } from "next/font/google"
-import "./globals.css"
-import { Sidebar } from "@/components/layout/Sidebar"
-import { Header } from "@/components/layout/Header"
-import { MonedaProvider } from "@/context/MonedaContext"
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import "./globals.css";
+import { Header } from "@/components/layout/Header";
+import { MonedaProvider } from "@/context/MonedaContext";
+import { Sidebar } from "@/components/layout/Sidebar";
 
 const inter = Inter({
   subsets: ["latin"],
-})
+});
 
 export const metadata: Metadata = {
   title: "RedAbasto House",
   description: "Sistema de gestión de productos y ventas",
-}
+};
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode
+  children: React.ReactNode;
 }>) {
   return (
     <html lang="es">
@@ -31,5 +31,5 @@ export default function RootLayout({
         </MonedaProvider>
       </body>
     </html>
-  )
+  );
 }
