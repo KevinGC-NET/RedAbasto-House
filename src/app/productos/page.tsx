@@ -16,12 +16,16 @@ import { useMoneda } from "@/context/MonedaContext";
 import type { Producto, Categoria } from "@/types";
 import Image from "next/image";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
+import { useRouter, useSearchParams } from "next/navigation";
 import { WhatsappButton } from "@/components/ui/whatsapp-button";
 
 type ViewMode = "grid" | "table";
 
 export default function ProductosPage() {
   const isAdmin = useIsAdmin();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const categoryParam = searchParams.get("category");
 
   const [productos, setProductos] = useState<Producto[]>([]);
   const [categorias, setCategorias] = useState<Categoria[]>([]);
@@ -198,6 +202,12 @@ export default function ProductosPage() {
     fetchData();
   }
 
+  useEffect(() => {
+    setFilterCategory(
+      categorias.find((c) => c.nombre === categoryParam)?.id || "all",
+    );
+  }, [categoryParam, categorias]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -217,7 +227,19 @@ export default function ProductosPage() {
             <Select
               label="Filtrar por categoría"
               value={filterCategory}
-              onChange={(e) => setFilterCategory(e.target.value)}
+              onChange={(e) => {
+                const value = e.target.value;
+                const params = new URLSearchParams(searchParams.toString());
+                if (value !== "all") {
+                  params.set(
+                    "category",
+                    categorias.find((c) => c.id === value)?.nombre || "",
+                  );
+                } else {
+                  params.delete("category");
+                }
+                router.push(`?${params.toString()}`);
+              }}
               options={[
                 { value: "all", label: "Todas las categorías" },
                 ...categorias.map((c) => ({
