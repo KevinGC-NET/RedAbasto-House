@@ -1,0 +1,35 @@
+<svg width="800" height="250" viewBox="0 0 800 250" fill="none" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<!-- Filtro de sombra para mantener legibilidad sobre fondos claros -->
+<filter id="textShadow" x="-10%" y="-10%" width="120%" height="120%">
+<feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+<feOffset dx="2" dy="4" result="offsetblur"/>
+<feComponentTransfer>
+<feFuncA type="linear" slope="0.3"/>
+</feComponentTransfer>
+<feMerge>
+<feMergeNode/>
+<feMergeNode in="SourceGraphic"/>
+</feMerge>
+</filter>
+</defs>
+
+<!-- Grupo contenedor con centrado matemático -->
+<g filter="url(#textShadow)">
+    <!-- "Red" - Azul Tecnológico -->
+    <text x="165" y="145" fill="#1e3a8a" style="font-family: 'Inter', sans-serif; font-weight: 500; font-size: 90px; letter-spacing: -2px;">Red</text>
+    
+    <!-- "Abasto" - Blanco (Nota: Invisible si el fondo es blanco) -->
+    <text x="335" y="145" fill="#111827" style="font-family: 'Inter', sans-serif; font-weight: 900; font-size: 90px; font-style: italic; letter-spacing: -3px;">Abasto</text>
+
+    <!-- Detalle de Conexión (Símbolo de Red integrado) -->
+    <circle cx="330" cy="120" r="7" fill="#1e3a8a" />
+    <path d="M330 120C330 100 355 92 370 92" stroke="#1e3a8a" stroke-width="3" stroke-dasharray="4 4" />
+    
+    <!-- Líneas de acento inferior para equilibrio visual -->
+    <rect x="165" y="170" width="470" height="4" rx="2" fill="white" fill-opacity="0.1"/>
+    <rect x="165" y="170" width="70" height="4" rx="2" fill="#1e3a8a"/>
+</g>
+
+
+</svg>
