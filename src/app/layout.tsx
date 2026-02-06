@@ -4,6 +4,7 @@ import "./globals.css";
 import { Header } from "@/components/layout/Header";
 import { MonedaProvider } from "@/context/MonedaContext";
 import { Sidebar } from "@/components/layout/Sidebar";
+import { BaseLayout } from "./base";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -26,7 +27,7 @@ export default function RootLayout({
           <Sidebar />
           <div className="lg:ml-64">
             <Header />
-            <main className="p-4 pt-16 lg:pt-4 lg:p-6">{children}</main>
+            <BaseLayout> {children} </BaseLayout>
           </div>
         </MonedaProvider>
       </body>
