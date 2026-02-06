@@ -418,11 +418,13 @@ export default function ProductosPage() {
                           </button>
                         </>
                       ) : (
-                        <WhatsappButton
-                          productName={producto.nombre}
-                          productId={producto.id}
-                          price={`$ ${producto.precio} al cambio BCV`}
-                        />
+                        producto.stock > 0 && (
+                          <WhatsappButton
+                            productName={producto.nombre}
+                            productId={producto.id}
+                            price={`$ ${producto.precio} al cambio BCV`}
+                          />
+                        )
                       )}
                     </div>
                   </div>
@@ -727,11 +729,13 @@ export default function ProductosPage() {
                             </button>
                           </>
                         ) : (
-                          <WhatsappButton
-                            productName={producto.nombre}
-                            productId={producto.id}
-                            price={`$ ${producto.precio} al cambio BCV`}
-                          />
+                          producto.stock > 0 && (
+                            <WhatsappButton
+                              productName={producto.nombre}
+                              productId={producto.id}
+                              price={`$ ${producto.precio} al cambio BCV`}
+                            />
+                          )
                         )}
                       </div>
                     </div>
