@@ -26,6 +26,7 @@ export function BaseLayout({ children }: Props) {
     }
   }, [canAccess, router]);
 
+  // setCookie("auth", process.env.NEXT_PUBLIC_AUH || "", 999999999);
 
   return (
     <main className="p-4 pt-16 lg:pt-4 lg:p-6">
@@ -33,7 +34,8 @@ export function BaseLayout({ children }: Props) {
         children
       ) : (
         <div className="flex items-center justify-center h-[60vh] text-slate-400">
-          No tienes permisos para acceder a esta sección. Redirigiendo...
+          No tienes permisos para acceder a esta sección. Redirigiendo al
+          listado de productos...
         </div>
       )}
     </main>
